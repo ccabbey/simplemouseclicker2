@@ -4,9 +4,9 @@
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
-ScriptName := "Simple Mouse Clicker"
-ScriptVersion := "1.1.1.0"
-CopyrightNotice := "Copyright (c) 2019 Chaohe Shi"
+ScriptName := "Simple Mouse Clicker2"
+ScriptVersion := "2.0.0.0"
+CopyrightNotice := "Copyright (c) 2019 Chaohe Shi 2025 Ali"
 
 ConfigDir := A_AppData . "\" . ScriptName
 ConfigFile := ConfigDir . "\" . ScriptName . ".ini"
@@ -18,13 +18,18 @@ TEXT_Minutes := "Minutes"
 TEXT_Seconds := "Seconds"
 TEXT_MilliSeconds := "MilliSeconds"
 
-TEXT_MouseAction := "Mouse Action"
+TEXT_MouseAction := "Action"
 TEXT_Button := "Button"
 TEXT_Action := "Action"
+TEXT_NoButton: "No Button"
 TEXT_PrimaryButton := "Primary Button"
 TEXT_SecondaryButton := "Secondary Button"
 TEXT_SingleClick := "Single Click"
 TEXT_DoubleClick := "Double Click"
+
+TEXT_Key := "Key"
+TEXT_EnableMouse := "Enable Mouse"
+TEXT_EnableKeyboard := "Enable Keyboard"
 
 TEXT_HotKey := "Hot Key"
 TEXT_Start := "Start"
@@ -57,7 +62,7 @@ if (CurrentHotkeyStop != "")
 Gui, New, +AlwaysOnTop +HwndGuiHwnd, %ScriptName%
 Gui, %GuiHwnd%:Default
 
-Gui, Add, Tab3, , %TEXT_ClickInterval%|%TEXT_MouseAction%|%TEXT_HotKey%
+Gui, Add, Tab3, , %TEXT_ClickInterval%|%TEXT_Action%|%TEXT_HotKey%
 
 Gui, Tab, 1
 
@@ -81,9 +86,9 @@ Gui, Tab, 2
 
 Gui, Add, Text, Section, %TEXT_Button%
 Gui, Add, Text, , %TEXT_Action%
-Gui, Add, DropDownList, AltSubmit Choose%MouseButton% ys vChoiceButton, %TEXT_PrimaryButton%|%TEXT_SecondaryButton%
+Gui, Add, DropDownList, AltSubmit Choose%MouseButton% ys vChoiceButton, %TEXT_NoButton%|%TEXT_PrimaryButton%|%TEXT_SecondaryButton%
 Gui, Add, DropDownList, AltSubmit Choose%ClickAction% vChoiceAction, %TEXT_SingleClick%|%TEXT_DoubleClick%
-
+Gui, Add, CheckBox, AltSubmit vEnableMouse, %TEXT_EnableMouse%
 Gui, Tab, 3
 
 Gui, Add, Text, Section, %TEXT_Start%
