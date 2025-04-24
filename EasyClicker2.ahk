@@ -146,7 +146,7 @@ HotkeyStop(*) {
 ; GUI 关闭事件
 ui.OnEvent("Close", GuiClose)
 GuiClose(*) { 
-    global ConfigFile, UpDownHour, UpDownMinute, UpDownSecond, UpDownMilliSecond, lstMouseButton, lstMouseAction, HkStart, HkStop
+    global ConfigFile, UpDownHour, UpDownMinute, UpDownSecond, UpDownMilliSecond, lstMouseButton, lstMouseAction, hkHotkeyStart, hkHotkeyStop
     if !FileExist(ConfigDir)
         DirCreate(ConfigDir)
     IniWrite(UpDownHour.Value, ConfigFile, "ClickInterval", "Hours")
