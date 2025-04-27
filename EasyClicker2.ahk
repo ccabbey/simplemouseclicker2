@@ -1,44 +1,21 @@
-
+﻿
 #SingleInstance Force
 
 
 ; 初始化变量
-ScriptName := "Easy Clicker2"
+ScriptName := "EasyClicker2"
 ScriptVersion := "1.0.0.0"
 CopyrightNotice := ""
 
 ConfigDir := A_ScriptDir
 ConfigFile := ConfigDir . "\" . ScriptName . ".ini"
 
-; 设置文本
-TEXT_ClickInterval := "Click Interval"
-TEXT_Hours := "Hours"
-TEXT_Minutes := "Minutes"
-TEXT_Seconds := "Seconds"
-TEXT_MilliSeconds := "MilliSeconds"
-
-TEXT_MouseAction := "Action"
-TEXT_Button := "Button"
-TEXT_Action := "Action"
-TEXT_NoButton := "No Button"
-TEXT_PrimaryButton := "LButton"
-TEXT_SecondaryButton := "RButton"
-TEXT_SingleClick := "Single Click"
-TEXT_DoubleClick := "Double Click"
-
-TEXT_Key := "Key"
-TEXT_EnableMouse := "Enable Mouse"
-TEXT_EnableKeyboard := "Enable Keyboard"
-
-TEXT_HotKey := "Hot Key"
-TEXT_Start := "Start"
-TEXT_Stop := "Stop"
 
 ; 从配置文件读取设置
-Hours := IniRead(ConfigFile, "ClickInterval", "Hours", 0)
-Minutes := IniRead(ConfigFile, "ClickInterval", "Minutes", 0)
-Seconds := IniRead(ConfigFile, "ClickInterval", "Seconds", 1)
-MilliSeconds := IniRead(ConfigFile, "ClickInterval", "MilliSeconds", 0)
+cfgHours := IniRead(ConfigFile, "ClickInterval", "Hours", 0)
+cfgMinutes := IniRead(ConfigFile, "ClickInterval", "Minutes", 0)
+cfgSeconds := IniRead(ConfigFile, "ClickInterval", "Seconds", 0)
+cfgMilliSeconds := IniRead(ConfigFile, "ClickInterval", "MilliSeconds", 0)
 
 EnableMouseChecked := IniRead(ConfigFile, "MouseAction", "EnableMouse", 1)
 MouseButton := IniRead(ConfigFile, "MouseAction", "MouseButton", 1)
@@ -51,35 +28,36 @@ cfgHotkeyStart := IniRead(ConfigFile, "HotKey", "HotkeyStart", "F9")
 cfgHotkeyStop := IniRead(ConfigFile, "HotKey", "HotkeyStop", "F10")
 
 
-; 注册热键
-;if CurrentHotkeyStart != ""
-;    Hotkey(CurrentHotkeyStart, "On")
-;if CurrentHotkeyStop != ""
-;    Hotkey(CurrentHotkeyStop, "On")
+; 注册全局热键
+if cfgHotkeyStart != ""
+    Hotkey(cfgHotkeyStart, HotkeyStart,"On")
+if cfgHotkeyStop != ""
+    Hotkey(cfgHotkeyStop, HotkeyStop,"On")
 
 ; 创建 GUI
 ui := Gui("+AlwaysOnTop", ScriptName)
 tab:=ui.AddTab3(,["Interval", "Mouse","Keyboard","Hotkey"])
 
 tab.UseTab("Interval")
-ui.AddText("Section", TEXT_Hours)
-ui.AddEdit("Number Limit2 w50", Hours)
-UpDownHour :=ui.AddUpDown("Range0-24")
+ui.AddText("Section", "Hours")
+ui.AddEdit("Number Limit2 w50")
+UpDownHour :=ui.AddUpDown("Range0-24",cfgHours)
 
-ui.AddText("Section ys", TEXT_Minutes)
-ui.AddEdit("Number Limit2 w50", Minutes)
-UpdownMinute:=ui.AddUpDown("Range0-59")
+ui.AddText("Section ys", "Minutes")
+ui.AddEdit("Number Limit2 w50")
+UpdownMinute:=ui.AddUpDown("Range0-59",cfgMinutes)
 
-ui.AddText("Section ys", TEXT_Seconds)
-ui.AddEdit("Number Limit2 w50", Seconds)
-UpDownSecond:=ui.AddUpDown("Range0-59")
+ui.AddText("Section ys", "Seconds")
+ui.AddEdit("Number Limit2 w50")
+UpDownSecond:=ui.AddUpDown("Range0-59",cfgSeconds)
 
-ui.AddText("Section ys", TEXT_MilliSeconds)
-ui.AddEdit("Number Limit3 w50 vUpDownMilliSecond", MilliSeconds)
-UpDownMilliSecond:=ui.AddUpDown("Range0-999",200)
+ui.AddText("Section ys", "MilliSeconds")
+ui.AddEdit("Number Limit3 w50 vUpDownMilliSecond")
+UpDownMilliSecond:=ui.AddUpDown("Range0-999",cfgMilliSeconds)
 
 tab.UseTab("Mouse")
 chbEnableMouse:=ui.AddCheckbox("Checked" EnableMouseChecked, "Enable Mouse")
+chbEnableMouse.OnEvent("Click", OnClickEnableMouseCheckbox)
 ui.AddText("Section", "Button")
 ui.AddText(, "Action")
 lstMouseButton:=ui.AddDropDownList("ys AltSubmit Choose" MouseButton, ["LButton", "RButton"])
@@ -92,55 +70,57 @@ hkKeystroke:=ui.AddHotkey(,cfgKeyStroke)
 
 
 tab.UseTab("Hotkey")
-ui.AddText("Section", TEXT_Start)
-ui.AddText(, TEXT_Stop)
+ui.AddText("Section", "Start")
+ui.AddText(, "Stop")
 hkHotkeyStart :=ui.AddHotkey("Limit1 ys", cfgHotkeyStart)
 hkHotkeyStop  :=ui.AddHotkey("Limit1", cfgHotkeyStop)
 
 tab.UseTab()
-btnStart:=ui.Add("Button", "Default w75 h23", "Start").OnEvent("Click", ButtonStart)
-btnStop:=ui.Add("Button", "x+m w75 h23", "Stop").OnEvent("Click", ButtonStop)
+btnStart:=ui.Add("Button", "Default w75 h23", "Start").OnEvent("Click", OnClickStartButton)
+btnStop:=ui.Add("Button", "x+m w75 h23", "Stop").OnEvent("Click", OnClickStopButton)
 ui.Show()
 
-; 按钮事件
-ButtonStart(*) {
-    global ui
-    ui.Submit()
-    ui.Minimize()
-    interval := UpDownHour * 3600000 + UpDownMinute * 60000 + UpDownSecond * 1000 + UpDownMilliSecond
+
+; Start Button Event
+OnClickStartButton(*) {
+    ;ui.Submit()
+    ;ui.Minimize()
+
+    ; determine mouse action and keyboard action
+    interval := UpDownHour.Value * 3600000 + UpDownMinute.Value * 60000 + UpDownSecond.Value * 1000 + UpDownMilliSecond.Value
     if interval > 0 {
-        SetTimer(() => ClickPrimaryButton(), interval)
+        if (chbEnableMouse.Value) {
+            SetTimer ClickButton, interval
+        }
+        if (chbEnableKeyboard.Value) {
+            SetTimer SendKeyStroke, interval
+        }
     }
 }
 
-ButtonStop(*) {
-    SetTimer(() => ClickPrimaryButton(), "Off")
-    SetTimer(() => ClickSecondaryButton(), "Off")
+; Stop Button Event
+OnClickStopButton(*) {
+    SetTimer ClickButton, 0
+    SetTimer SendKeyStroke, 0
 }
 
-ClickPrimaryButton() {
-    global lstMouseAction
-    Click(lstMouseAction)
+ClickButton(){
+    Click(lstMouseButton.Value,lstMouseAction.Value)
 }
 
-ClickSecondaryButton() {
-    global lstMouseAction
-    Click(lstMouseAction, "Right")
+SendKeyStroke(){
+    Send hkKeystroke.Value
 }
 
 ; 热键事件
 HotkeyStart(*) {
-    global CurrentHotkeyStart
-    Hotkey(CurrentHotkeyStart, ButtonStart, "Off")
-    CurrentHotkeyStart := HotkeyStart
-    Hotkey(CurrentHotkeyStart, ButtonStart, "On")
+    global cfgHotkeyStart
+    Hotkey(cfgHotkeyStart, OnClickStartButton, "on")
 }
 
 HotkeyStop(*) {
-    global CurrentHotkeyStop
-    Hotkey(CurrentHotkeyStop, ButtonStop, "Off")
-    CurrentHotkeyStop := HotkeyStop
-    Hotkey(CurrentHotkeyStop, ButtonStop, "On")
+    global cfgHotkeyStop
+    Hotkey(cfgHotkeyStop, OnClickStopButton, "on")
 }
 
 ; GUI 关闭事件
@@ -148,7 +128,7 @@ ui.OnEvent("Close", GuiClose)
 GuiClose(*) { 
     global ConfigFile, UpDownHour, UpDownMinute, UpDownSecond, UpDownMilliSecond, lstMouseButton, lstMouseAction, hkHotkeyStart, hkHotkeyStop
     if !FileExist(ConfigDir)
-        DirCreate(ConfigDir)
+        FileAppend(ConfigFile)
     IniWrite(UpDownHour.Value, ConfigFile, "ClickInterval", "Hours")
     IniWrite(UpDownMinute.Value, ConfigFile, "ClickInterval", "Minutes")
     IniWrite(UpDownSecond.Value, ConfigFile, "ClickInterval", "Seconds")
@@ -161,7 +141,17 @@ GuiClose(*) {
     IniWrite(chbEnableKeyboard.Value, ConfigFile, "KeyboardAction", "EnableKeyboard")
     IniWrite(hkKeystroke.Value, ConfigFile, "KeyboardAction", "KeyStroke")
 
-    IniWrite(hkHotkeyStart, ConfigFile, "HotKey", "HotkeyStart")
-    IniWrite(hkHotkeyStop, ConfigFile, "HotKey", "HotkeyStop")
+    IniWrite(hkHotkeyStart.Value, ConfigFile, "HotKey", "HotkeyStart")
+    IniWrite(hkHotkeyStop.Value, ConfigFile, "HotKey", "HotkeyStop")
     ExitApp()
+}
+
+; chbEnableMouse Event 
+OnClickEnableMouseCheckbox(*) {
+    global chbEnableMouse, lstMouseButton, lstMouseAction
+    if (chbEnableMouse.Value) {
+        cfgEnableMouse := 1
+    } else {
+        cfgEnableMouse := 0
+    }
 }
