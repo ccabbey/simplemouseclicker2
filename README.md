@@ -1,5 +1,17 @@
-Simple Mouse Clicker is a free software that can automate your mouse clicking.
+Simple Mouse Clicker 2( aka Easy Clicker 2) is a free software that can automate your mouse clicking.
 
+Based on https://chaohershi.github.io/simplemouseclicker/
+
+## What's New In Easy Clicker 2
+- Support keystroke automation
+- Rewrote the code using AHK v2
+
+## Screenshots
+![Easy Clicker 2 Sreenshot 1](img/EasyClicker2_1.png)
+
+![Easy Clicker 2 Sreenshot 2](img/EasyClicker2_2.png)
+---
+Below are introduction for original Simple Mouse Clicker
 ## Features
 - Support mouse click interval.
 - Support primary/secondary mouse button and single/double click action.
